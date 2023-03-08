@@ -16,22 +16,26 @@ const server = new ApolloServer({
   context: authMiddleware,
 });
 
-app.use(express.urlencoded({ extended: false })); //this was {extended: true} changed to match example
-app.use(express.json());
 
-const startApolloServer = async (typeDefs, resolvers) => {
+const startApolloServer = async () => {
   await server.start();
-  server.applyMiddleware({ app });
+  server.applyMiddleware({ 
+    app,
+    path: '/graphql'
+  });
+  
+  app.use(express.urlencoded({ extended: false })); //this was {extended: true} changed to match example
+  app.use(express.json());
   
   // if we're in production, serve client/build as static assets
   if (process.env.NODE_ENV === 'production') {
     app.use(express.static(path.join(__dirname, '../client/build')));
+    
+    // this will connect all requests to ../client/build/index.html
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(__dirname, '../client/build/index.html'));
+    });
   }
-
-  // this will connect all requests to ../client/build/index.html
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/build/index.html'));
-  });
 
   db.once('open', () => {
     app.listen(PORT, () => {
@@ -41,7 +45,7 @@ const startApolloServer = async (typeDefs, resolvers) => {
   })
 };
 
-startApolloServer(typeDefs, resolvers);
+startApolloServer();
 
 
 
