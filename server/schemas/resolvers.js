@@ -1,5 +1,5 @@
 const { AuthenticationError } = require('apollo-server-express');
-const { User, Book } = require('../models');
+const { User } = require('../models');
 const { signToken } = require('../utils/auth');
 
 const resolvers = {
@@ -45,19 +45,24 @@ const resolvers = {
     saveBook: async (parent, args, context) => {
       //findOneAndUpdate
       if (context.user) {
-        return Book.findOneAndUpdate(
-          // {}
-          // {}
-          // {}
+        return User.findOneAndUpdate(
+          {_id: context.user._id},
+          {$addToSet: {savedBooks: args.input}},
+          {new:true, runValidators: true},
         )
       }
+
     },
 
     //deleteBook
     removeBook: async (parent, args, context) => {
-      //findOneAndDelete
-    }
-
+      //findOneAndUpdate
+      return User.findOneAndUpdate(
+        {_id: context.user._id},
+        {$pull: {savedBooks: {bookId: args.bookId}}},
+        {new: true}
+      )
+    },
 
   }
 }

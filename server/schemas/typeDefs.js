@@ -6,7 +6,7 @@ type User {
   _id: ID!
   username: String
   email: String
-  password: String #considered optional not needed to send accross the network
+  # password: String #considered not best practice to add password not needed to send accross the network
   bookCount: Int
   savedBooks: [Book]
 }
